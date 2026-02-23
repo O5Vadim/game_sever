@@ -6,7 +6,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 игроки = {}
-PORT_WS = 10000
+PORT_WS = 9000
 PORT_HTTP = int(os.environ.get("PORT", 8080))
 
 # ===== HTTP ПОТОК (отвечает на пинги Render) =====
