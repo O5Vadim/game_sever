@@ -1,29 +1,13 @@
 import asyncio
 import websockets
 import json
-from http.server import BaseHTTPRequestHandler
-import threading
-from http.server import HTTPServer
+import os
 
 игроки = {}
 
-# HTTP сервер для проверок Render
-class HealthCheck(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"OK")
-    def do_HEAD(self):
-        self.send_response(200)
-        self.end_headers()
-    def log_message(self, format, *args):
-        pass
+PORT = int(os.environ.get("PORT", 10000))
 
-def запустить_http():
-    сервер = HTTPServer(("0.0.0.0", 8080), HealthCheck)
-    сервер.serve_forever()
-
-async def обработчик(websocket):
+async def обработчик(websocket, path=None):
     игрок_id = str(id(websocket))
     игроки[игрок_id] = {"ws": websocket, "x": 100, "y": 400, "ник": "Игрок"}
     print(f"Игрок подключился. Всего: {len(игроки)}")
@@ -63,13 +47,9 @@ async def обработчик(websocket):
         print(f"Игрок отключился. Осталось: {len(игроки)}")
 
 async def main():
-    # Запускаем HTTP в отдельном потоке
-    http_поток = threading.Thread(target=запустить_http, daemon=True)
-    http_поток.start()
-    print("HTTP сервер запущен на порту 8080")
-    
-    async with websockets.serve(обработчик, "0.0.0.0", 10000):
-        print("WebSocket сервер запущен на порту 10000!")
+    print(f"Запуск сервера на порту {PORT}...")
+    async with websockets.serve(обработчик, "0.0.0.0", PORT):
+        print("Сервер запущен!")
         await asyncio.Future()
 
 asyncio.run(main())
